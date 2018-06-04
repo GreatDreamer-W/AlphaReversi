@@ -79,8 +79,9 @@ public class MCTS {
             }
         }
         else if(strategy == 2) {    // 策略2中wins为每场黑白棋棋子数之比
+            double finalWins = currentNode.getWins(root.player);
             while(currentNode != null) {
-                currentNode.wins += currentNode.getWins();
+                currentNode.wins += finalWins;
                 currentNode = currentNode.superNode;
             }
         }

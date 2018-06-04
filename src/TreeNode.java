@@ -242,24 +242,33 @@ public class TreeNode {
         }
     }
 
-    public double getWins() {
+    public double getWins(char player) {
         double countWhite = 0;
         double countBlack = 0;
         for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(state[i][j] == 'W') {
+            for (int j = 0; j < 8; j++) {
+                if (state[i][j] == 'W') {
                     countWhite += 1;
-                }
-                else if(state[i][j] == 'B') {
+                } else if (state[i][j] == 'B') {
                     countBlack += 1;
                 }
             }
         }
         if(player == 'W') {
-            return countWhite / countBlack;
+            if(countBlack > countWhite) {
+                return 0;
+            }
+            else {
+                return Math.exp((countWhite - countBlack) / countBlack);
+            }
         }
         else {
-            return countBlack / countWhite;
+            if(countWhite > countBlack) {
+                return 0;
+            }
+            else {
+                return Math.exp((countBlack - countWhite) / countWhite);
+            }
         }
     }
 
