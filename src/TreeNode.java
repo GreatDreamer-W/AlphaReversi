@@ -7,8 +7,8 @@ public class TreeNode {
     public LinkedList<TreeNode> subNodes;
     public TreeNode superNode;
     public int numOfTiles;
-    public int wins;
-    public int plays;
+    public double wins;
+    public double plays;
 
     public TreeNode(char player) {
         this(player, new char[][]{{'0', '0', '0', '0', '0', '0', '0', '0'},
@@ -104,39 +104,37 @@ public class TreeNode {
     public void flip(int[] move) {
         this.move = move;
         numOfTiles++;
-        int xStart = move[0];
-        int yStart = move[1];
-        char anotherPlayer;
+        if(move != null) {
+            int xStart = move[0];
+            int yStart = move[1];
+            char anotherPlayer;
 
-        state[xStart][yStart] = player;
-        if(player == 'W') {
-            anotherPlayer = 'B';
-        }
-        else {
-            anotherPlayer = 'W';
-        }
+            state[xStart][yStart] = player;
+            anotherPlayer = (player == 'W') ? 'B' : 'W';
 
-        int[][] directions = {{0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}};
-        for(int[] direction : directions) {
-            int x = xStart + direction[0];
-            int y = yStart + direction[1];
-            while(isOnBoard(x, y) && state[x][y] == anotherPlayer) {
-                x += direction[0];
-                y += direction[1];
-            }
-            if(isOnBoard(x, y) && state[x][y] == player) {
-                while(true) {
-                    x -= direction[0];
-                    y -= direction[1];
-                    if(x == xStart && y == yStart) {
-                        break;
-                    }
-                    else {
-                        state[x][y] = player;
+            int[][] directions = {{0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}};
+            for(int[] direction : directions) {
+                int x = xStart + direction[0];
+                int y = yStart + direction[1];
+                while(isOnBoard(x, y) && state[x][y] == anotherPlayer) {
+                    x += direction[0];
+                    y += direction[1];
+                }
+                if(isOnBoard(x, y) && state[x][y] == player) {
+                    while(true) {
+                        x -= direction[0];
+                        y -= direction[1];
+                        if(x == xStart && y == yStart) {
+                            break;
+                        }
+                        else {
+                            state[x][y] = player;
+                        }
                     }
                 }
             }
         }
+        player = (player == 'W') ? 'B' : 'W';
     }
 
     public void getSubNodes() {
@@ -147,12 +145,6 @@ public class TreeNode {
                 TreeNode child = this.clone();
                 child.superNode = this;
                 child.flip(move);
-                if(child.player == 'W') {
-                    child.player = 'B';
-                }
-                else {
-                    child.player = 'W';
-                }
                 subNodes.add(child);
             }
         }
@@ -247,6 +239,27 @@ public class TreeNode {
         }
         else {
             return '0'; // 平局
+        }
+    }
+
+    public double getWins() {
+        double countWhite = 0;
+        double countBlack = 0;
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                if(state[i][j] == 'W') {
+                    countWhite += 1;
+                }
+                else if(state[i][j] == 'B') {
+                    countBlack += 1;
+                }
+            }
+        }
+        if(player == 'W') {
+            return countWhite / countBlack;
+        }
+        else {
+            return countBlack / countWhite;
         }
     }
 

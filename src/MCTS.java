@@ -6,11 +6,20 @@ public class MCTS {
     private int maxTime;    // 获得结果的最大运行时间，单位为毫秒
     private int maxMoves;
     double[] ucb1;
+    private int strategy;
 
     public MCTS(char player, char[][] state) {
         root = new TreeNode(player, state);
         maxTime = 1000;
         maxMoves = 10;
+        strategy = 1;
+    }
+
+    public MCTS(char player, char[][] state, int maxMoves, int strategy) {
+        root = new TreeNode(player, state);
+        maxTime = 1000;
+        this.maxMoves = maxMoves;
+        this.strategy = strategy;
     }
 
     public int[] getPlay() {
@@ -50,7 +59,7 @@ public class MCTS {
                     break;
                 }
             }
-            if(k == currentNode.subNodes.size()) {  // 若所有的子节点均被访问过，计算ucb1
+            if(k == currentNode.subNodes.size()) {  // 若所有的子节点均被访问过
                 currentNode = currentNode.subNodes.get(getIndexOfMaxUCB1(currentNode));
             }
             else {  // 否则随机选择
@@ -61,13 +70,20 @@ public class MCTS {
         }
 
         currentNode.plays++;
-        if(currentNode.getWinner() == root.player) {
+        if(strategy == 1) {     //策略1中wins为胜场数
+            if(currentNode.getWinner() == root.player) {
+                while(currentNode != null) {
+                    currentNode.wins += 1;
+                    currentNode = currentNode.superNode;
+                }
+            }
+        }
+        else if(strategy == 2) {    // 策略2中wins为每场黑白棋棋子数之比
             while(currentNode != null) {
-                currentNode.wins++;
+                currentNode.wins += currentNode.getWins();
                 currentNode = currentNode.superNode;
             }
         }
-
     }
 
     private int getIndexOfMaxUCB1(TreeNode node) {

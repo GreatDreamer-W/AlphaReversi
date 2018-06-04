@@ -2,7 +2,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Board {
-    private char first;     // 先手：玩家 or 电脑
+    private char first;     // 先手
     private char player;    // 玩家
 
     public Board(char first, char player) {
@@ -10,7 +10,7 @@ public class Board {
         this.player = player;
     }
 
-    public void play() {
+    public void humanMachineplay() {
         Scanner input = new Scanner(System.in);
         TreeNode board = new TreeNode(first);
         if(first != player) {   // 电脑先手
@@ -62,6 +62,45 @@ public class Board {
             else {
                 board.player = 'W';
             }
+        }
+        board.print();
+        if(board.getWinner() == 'W') {
+            System.out.println("白棋获胜！");
+        }
+        else {
+            System.out.println("黑棋获胜！");
+        }
+
+    }
+
+    public void machineMachinePlay() {
+        TreeNode board = new TreeNode('W');
+        while(!board.gameOver()) {
+            board.print();
+            int[] move;
+            MCTS mcts;
+            if(board.player == 'W') {
+                mcts = new MCTS(board.player, board.state, 20, 1);
+            }
+            else {
+                mcts = new MCTS(board.player, board.state, 20, 2);
+            }
+            move = mcts.getPlay();
+            if(move == null) {
+                System.out.println("当前状态计算机无可行解，自动弃权！");
+            }
+            else {
+                System.out.print("计算结果为");
+                System.out.println(" (" + String.valueOf(move[0] + 1) + ", " + String.valueOf(move[1] + 1) + ")");
+            }
+            board.flip(move);
+        }
+        board.print();
+        if(board.getWinner() == 'W') {
+            System.out.println("白棋获胜！");
+        }
+        else {
+            System.out.println("黑棋获胜！");
         }
     }
 }
