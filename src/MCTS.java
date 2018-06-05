@@ -1,12 +1,13 @@
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.RecursiveTask;
 
-public class MCTS {
+public class MCTS extends RecursiveTask<Integer> {
     private TreeNode root;
     private int maxTime;    // 获得结果的最大运行时间，单位为毫秒
     private int maxMoves;
-    double[] ucb1;
     private int strategy;
+    private boolean isRoot;
 
     public MCTS(char player, char[][] state) {
         root = new TreeNode(player, state);
@@ -15,11 +16,12 @@ public class MCTS {
         strategy = 1;
     }
 
-    public MCTS(char player, char[][] state, int maxMoves, int strategy) {
+    public MCTS(char player, char[][] state, int maxMoves, int strategy, boolean isRoot) {
         root = new TreeNode(player, state);
         maxTime = 1000;
         this.maxMoves = maxMoves;
         this.strategy = strategy;
+        this.isRoot = isRoot;
     }
 
     public int[] getPlay() {
@@ -37,6 +39,12 @@ public class MCTS {
         }
 
         return root.subNodes.get(getIndexOfMaxUCB1(root)).move;
+    }
+
+    public Integer compute() {
+        if(isRoot == true) {
+
+        }
     }
 
     public void simulate() {
@@ -74,14 +82,20 @@ public class MCTS {
             if(currentNode.getWinner() == root.player) {
                 while(currentNode != null) {
                     currentNode.wins += 1;
+                    currentNode.evaluation += 1;
                     currentNode = currentNode.superNode;
                 }
             }
         }
-        else if(strategy == 2) {    // 策略2中wins为每场黑白棋棋子数之比
-            double finalWins = currentNode.getWins(root.player);
+        else {    // 策略2中wins为每场黑白棋棋子数之比
+            int win = 0;
+            if(currentNode.getWinner() == root.player) {
+                win = 1;
+            }
+            double finalWins = currentNode.getWins(root.player, strategy);
             while(currentNode != null) {
-                currentNode.wins += finalWins;
+                currentNode.wins += win;
+                currentNode.evaluation += finalWins;
                 currentNode = currentNode.superNode;
             }
         }
@@ -90,7 +104,7 @@ public class MCTS {
     private int getIndexOfMaxUCB1(TreeNode node) {
         double[] ucb1 = new double[node.subNodes.size()];
         for(int x = 0; x < node.subNodes.size(); x++) {
-            double w = node.subNodes.get(x).wins;
+            double w = node.subNodes.get(x).evaluation;
             double n = node.subNodes.get(x).plays;
             double t = node.plays;
             ucb1[x] = w / n + 1.414 * Math.sqrt(Math.log(t) / n);

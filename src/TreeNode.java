@@ -7,8 +7,9 @@ public class TreeNode {
     public LinkedList<TreeNode> subNodes;
     public TreeNode superNode;
     public int numOfTiles;
-    public double wins;
-    public double plays;
+    public int wins;
+    public int plays;
+    public double evaluation;
 
     public TreeNode(char player) {
         this(player, new char[][]{{'0', '0', '0', '0', '0', '0', '0', '0'},
@@ -30,6 +31,7 @@ public class TreeNode {
         numOfTiles = 0;
         wins = 0;
         plays = 0;
+        evaluation = 0;
 
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
@@ -49,6 +51,7 @@ public class TreeNode {
         this.numOfTiles = numOfTiles;
         wins = 0;
         plays = 0;
+        evaluation = 0;
     }
 
     public LinkedList<int[]> getValidMoves() {
@@ -103,8 +106,8 @@ public class TreeNode {
 
     public void flip(int[] move) {
         this.move = move;
-        numOfTiles++;
         if(move != null) {
+            numOfTiles++;
             int xStart = move[0];
             int yStart = move[1];
             char anotherPlayer;
@@ -242,7 +245,7 @@ public class TreeNode {
         }
     }
 
-    public double getWins(char player) {
+    public double getWins(char player, int strategy) {
         double countWhite = 0;
         double countBlack = 0;
         for(int i = 0; i < 8; i++) {
@@ -254,21 +257,34 @@ public class TreeNode {
                 }
             }
         }
-        if(player == 'W') {
-            if(countBlack > countWhite) {
-                return 0;
+        if(strategy == 2) {
+            if(player == 'W') {
+                if(countBlack > countWhite) {
+                    return 0;
+                }
+                else {
+                    return Math.exp((countWhite - countBlack) / 32);
+                }
             }
             else {
-                return Math.exp((countWhite - countBlack) / countBlack);
+                if(countWhite > countBlack) {
+                    return 0;
+                }
+                else {
+                    return Math.exp((countBlack - countWhite) / 32);
+                }
+            }
+        }
+        else if(strategy == 3) {
+            if(player == 'W') {
+                    return Math.exp((countWhite - countBlack) / 32);
+            }
+            else {
+                    return Math.exp((countBlack - countWhite) / 32);
             }
         }
         else {
-            if(countWhite > countBlack) {
-                return 0;
-            }
-            else {
-                return Math.exp((countBlack - countWhite) / countWhite);
-            }
+            return 1;
         }
     }
 

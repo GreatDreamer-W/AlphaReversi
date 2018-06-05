@@ -70,23 +70,23 @@ public class Board {
     public char machineMachinePlay() {
         TreeNode board = new TreeNode('W');
         while(!board.gameOver()) {
-//            board.print();
+            board.print();
             int[] move;
             MCTS mcts;
             if(board.player == 'W') {
-                mcts = new MCTS(board.player, board.state, 15, 1);
-            }
-            else {
                 mcts = new MCTS(board.player, board.state, 15, 2);
             }
+            else {
+                mcts = new MCTS(board.player, board.state, 15, 3);
+            }
             move = mcts.getPlay();
-//            if(move == null) {
-//                System.out.println("当前状态计算机无可行解，自动弃权！");
-//            }
-//            else {
-//                System.out.print("计算结果为");
-//                System.out.println(" (" + String.valueOf(move[0] + 1) + ", " + String.valueOf(move[1] + 1) + ")");
-//            }
+            if(move == null) {
+                System.out.println("当前状态计算机无可行解，自动弃权！");
+            }
+            else {
+                System.out.print("计算结果为");
+                System.out.println(" (" + String.valueOf(move[0] + 1) + ", " + String.valueOf(move[1] + 1) + ")");
+            }
             board.flip(move);
         }
         board.print();
