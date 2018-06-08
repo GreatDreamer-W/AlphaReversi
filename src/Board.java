@@ -1,5 +1,7 @@
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 public class Board {
     private char first;     // 先手
@@ -15,7 +17,7 @@ public class Board {
         TreeNode board = new TreeNode(first);
         if(first != player) {   // 电脑先手
             board.print();
-            MCTS mcts = new MCTS(board.player, board.state, 15, 2);
+            MCTS mcts = new MCTS(board.player, board.state, 1000, 15, 2, 1);
             int[] move = mcts.getPlay();
             if(move == null) {
                 System.out.println("当前状态计算机无可行解，自动弃权！");
@@ -48,7 +50,7 @@ public class Board {
                 }
             }
             else {
-                MCTS mcts = new MCTS(board.player, board.state, 15, 2);
+                MCTS mcts = new MCTS(board.player, board.state, 1000, 15, 2,1);
                 move = mcts.getPlay();
                 if(move == null) {
                     System.out.println("当前状态计算机无可行解，自动弃权！");
@@ -68,18 +70,20 @@ public class Board {
     }
 
     public char machineMachinePlay() {
+        ForkJoinPool fjp = new ForkJoinPool(4);
         TreeNode board = new TreeNode('W');
         while(!board.gameOver()) {
             board.print();
             int[] move;
-            MCTS mcts;
+            ForkJoinTask<int[]> mcts;
             if(board.player == 'W') {
-                mcts = new MCTS(board.player, board.state, 15, 2);
+                mcts = new MCTS(board.player, board.state, 1000, 15, 1,1);
             }
             else {
-                mcts = new MCTS(board.player, board.state, 15, 3);
+                mcts = new MCTS(board.player, board.state, 1000, 15, 3, 1);
             }
-            move = mcts.getPlay();
+            move = fjp.invoke(mcts);
+            System.out.println(move);
             if(move == null) {
                 System.out.println("当前状态计算机无可行解，自动弃权！");
             }

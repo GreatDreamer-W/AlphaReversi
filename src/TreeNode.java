@@ -141,26 +141,24 @@ public class TreeNode {
     }
 
     public void getSubNodes() {
-        subNodes = new LinkedList<>();
-        LinkedList<int[]> validMoves = getValidMoves();
-        if(validMoves.size() > 0) {
-            for(int[] move : validMoves) {
+        if(subNodes == null) {
+            subNodes = new LinkedList<>();
+            LinkedList<int[]> validMoves = getValidMoves();
+
+            if(validMoves.size() > 0) {
+                for(int[] move : validMoves) {
+                    TreeNode child = this.clone();
+                    child.superNode = this;
+                    child.flip(move);
+                    subNodes.add(child);
+                }
+            }
+            else {  // 若无合法移动
                 TreeNode child = this.clone();
                 child.superNode = this;
-                child.flip(move);
+                child.player = child.player == 'W' ? 'B' : 'W';
                 subNodes.add(child);
             }
-        }
-        else {  // 若无合法移动
-            TreeNode child = this.clone();
-            child.superNode = this;
-            if(child.player == 'W') {
-                child.player = 'B';
-            }
-            else {
-                child.player = 'W';
-            }
-            subNodes.add(child);
         }
     }
 
@@ -245,9 +243,9 @@ public class TreeNode {
         }
     }
 
-    public double getWins(char player, int strategy) {
-        double countWhite = 0;
-        double countBlack = 0;
+    public double getEvaluation(char player, int evaluationStrategy) {
+        int countWhite = 0;
+        int countBlack = 0;
         for(int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (state[i][j] == 'W') {
@@ -257,34 +255,33 @@ public class TreeNode {
                 }
             }
         }
-        if(strategy == 2) {
+
+        if(evaluationStrategy == 1) {
             if(player == 'W') {
-                if(countBlack > countWhite) {
-                    return 0;
-                }
-                else {
-                    return Math.exp((countWhite - countBlack) / 32);
-                }
+                return countWhite > countBlack ? 1 : 0;
             }
             else {
-                if(countWhite > countBlack) {
-                    return 0;
-                }
-                else {
-                    return Math.exp((countBlack - countWhite) / 32);
-                }
+                return countBlack > countWhite ? 1 : 0;
             }
         }
-        else if(strategy == 3) {
+        else if(evaluationStrategy == 2) {  // 自定义指数函数
             if(player == 'W') {
-                    return Math.exp((countWhite - countBlack) / 32);
+                return countWhite > countBlack ? Math.exp(((double)countWhite - (double)countBlack) / 32) : 0;
             }
             else {
-                    return Math.exp((countBlack - countWhite) / 32);
+                return countBlack > countWhite ? Math.exp(((double)countBlack - (double)countWhite) / 32) : 0;
+            }
+        }
+        else if(evaluationStrategy == 3) {  // 分段函数
+            if(player == 'W') {
+                return piecewiseFunction(countWhite, countBlack);
+            }
+            else {
+                return piecewiseFunction(countBlack, countWhite);
             }
         }
         else {
-            return 1;
+            return 0;
         }
     }
 
@@ -305,6 +302,18 @@ public class TreeNode {
         }
         else {
             return false;
+        }
+    }
+
+    private double piecewiseFunction(int count1, int count2) {
+        if(count1 - count2 >= 10) {
+            return 1.1;
+        }
+        else if(count1 - count2 >= 5) {
+            return 1;
+        }
+        else {
+            return 0.9;
         }
     }
 }
