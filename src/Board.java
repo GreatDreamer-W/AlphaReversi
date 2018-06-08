@@ -70,19 +70,21 @@ public class Board {
     }
 
     public char machineMachinePlay() {
-        ForkJoinPool fjp = new ForkJoinPool(4);
         TreeNode board = new TreeNode('W');
         while(!board.gameOver()) {
             board.print();
             int[] move;
-            ForkJoinTask<int[]> mcts;
+            MCTS mcts;
             if(board.player == 'W') {
-                mcts = new MCTS(board.player, board.state, 1000, 15, 1,1);
+                mcts = new MCTS(board.player, board.state, 500, 15, 1,1);
             }
             else {
                 mcts = new MCTS(board.player, board.state, 1000, 15, 3, 1);
             }
-            move = fjp.invoke(mcts);
+            long beginTime = System.currentTimeMillis();
+            move = mcts.getPlay();
+            System.out.print("计算时间为：");
+            System.out.println(String.valueOf(System.currentTimeMillis() - beginTime));
             System.out.println(move);
             if(move == null) {
                 System.out.println("当前状态计算机无可行解，自动弃权！");
